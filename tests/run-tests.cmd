@@ -5,6 +5,10 @@ cl /nologo /std:c11 /utf-8 /O2 /W3 /D_CRT_SECURE_NO_WARNINGS /Iinclude /Ithird_p
 if errorlevel 1 exit /b 1
 build\test_text.exe
 if errorlevel 1 exit /b 1
+cl /nologo /std:c11 /utf-8 /O2 /W3 /D_CRT_SECURE_NO_WARNINGS /Iinclude /Febuild\test_autoindent.exe /Fobuild\ tests\test_autoindent.c source\text.c
+if errorlevel 1 exit /b 1
+build\test_autoindent.exe
+if errorlevel 1 exit /b 1
 cl /nologo /std:c11 /utf-8 /O2 /W3 /Iinclude /Febuild\test_typer.exe /Fobuild\ tests\test_typer.c source\typer.c
 if errorlevel 1 exit /b 1
 build\test_typer.exe

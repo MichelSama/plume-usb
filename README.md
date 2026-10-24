@@ -52,6 +52,14 @@ Select any `.txt` file on the SD card. The `texts` folder in the package contain
 - Actual speed depends on the USB host and text field. Increase the delay if characters are missing. The app cannot detect characters ignored by the target application after USB completion.
 - A disconnect or failed transfer stops sending. B cancels and attempts to release all keys. There is no automatic retry of the text.
 
+## Auto-indent compensation
+
+In the preview, press L or tap `Auto-indent` to enable compensation when the target editor copies the previous line's indentation after Enter. It is off by default and the setting is saved.
+
+With compensation enabled, Plume USB sends one internal Backspace for each leading space or tab on the previous line, after Enter and its pause. It then types the next line exactly as supplied in the file. Mixed spaces and tabs are counted too. Literal Backspace control characters (U+0008) in files are rejected during preflight, regardless of this setting.
+
+This assumes the editor copies spaces/tabs literally and each Backspace deletes one character. Editors that expand tabs into spaces, add indentation after syntax such as block openers, or erase multiple spaces per Backspace need different handling. Test a short indented sample in the target editor before using compensation on a full file. The app cannot read back the target editor's contents.
+
 ## Controls
 
 | Control | Action |
@@ -63,12 +71,13 @@ Select any `.txt` file on the SD card. The `texts` folder in the package contain
 | Y | Switch AZERTY FR / QWERTY US |
 | ZR | Change character delay |
 | R in preview | Change Enter pause |
+| L in preview | Toggle auto-indent compensation |
 | ZL | Switch light / dark theme |
 | X | Toggle Caps Lock on the target |
 | - | USB diagnostics |
 | + | Exit |
 
-On-screen buttons and file rows also support touch. Layout, character delay, Enter pause and theme are saved to the SD card. Controls that would interfere with an active transfer are locked until it finishes.
+On-screen buttons and file rows also support touch. Layout, character delay, Enter pause, auto-indent compensation and theme are saved to the SD card. Controls that would interfere with an active transfer are locked until it finishes.
 
 ## Diagnostics
 

@@ -67,10 +67,12 @@ void view_render(const View *v,uint32_t *pixels,int stride) {
         button(441,580,235,"B  Back",false);
         snprintf(buffer,sizeof(buffer),"ZR  Delay: %s",pace_label(v->pace));
         chip(722,588,350,buffer);
-        caps_chip(v,48,658,310);
-        chip(376,658,250,"-  USB diagnostics");
+        caps_chip(v,48,658,248);
+        snprintf(buffer,sizeof(buffer),"L  Auto-indent: %s",v->cancel_autoindent?"on":"off");
+        chip(308,658,308,buffer);
+        chip(628,658,196,"-  Diagnostics");
         snprintf(buffer,sizeof(buffer),"R  Enter pause: %d ms",v->enter_pause_ms);
-        chip(644,658,588,buffer);
+        chip(836,658,396,buffer);
     } else if(v->screen==SCREEN_TRANSFER) {
         ui_text(48,159,48,p.ink,v->sending?"Sending":"Starting",1150);
         ui_text(50,229,24,p.muted,v->name,1150);
@@ -111,9 +113,10 @@ void view_render(const View *v,uint32_t *pixels,int stride) {
 }
 Action view_touch(const View *v,int x,int y) {
     if(v->screen==SCREEN_CONFIRM && y>=658 && y<698) {
-        if(x>=48 && x<358) return ACTION_CAPS_LOCK;
-        if(x>=376 && x<626) return ACTION_DIAGNOSTICS;
-        if(x>=644 && x<1232) return ACTION_ENTER_PAUSE;
+        if(x>=48 && x<296) return ACTION_CAPS_LOCK;
+        if(x>=308 && x<616) return ACTION_AUTOINDENT;
+        if(x>=628 && x<824) return ACTION_DIAGNOSTICS;
+        if(x>=836 && x<1232) return ACTION_ENTER_PAUSE;
     }
     if(v->screen==SCREEN_HOME) {
         if(x>=48 && x<774 && y>=279 && y<389) return ACTION_HELLO;

@@ -100,13 +100,18 @@ bool character_keys(uint32_t cp, KeyboardLayout layout, CharacterKeys *out) {
     return false;
 }
 
-bool text_plan(const char *text, size_t n, KeyboardLayout layout, TextPlan *plan, TextError *error) {
+bool text_plan(const char *text, size_t n, KeyboardLayout layout, bool cancel_autoindent, TextPlan *plan, TextError *error) {
     memset(plan,0,sizeof(*plan)); memset(error,0,sizeof(*error));
     if (n > 262144) return false;
-    plan->strokes = malloc((n ? n*2 : 1)*sizeof(Stroke));
+    /* When cancelling auto-indent we append up to one backspace per character
+       (leading spaces/tabs), so allocate n*3 to stay safe; otherwise n*2 suffices
+       for two-stroke dead keys in the FR layout. */
+    size_t alloc = cancel_autoindent ? n*3 : n*2;
+    plan->strokes = malloc((alloc ? alloc : 1)*sizeof(Stroke));
     if (!plan->strokes) return false;
     size_t pos=0;
     if (n>=3 && memcmp(text,"\xef\xbb\xbf",3)==0) pos=3;
+    size_t line_indent_characters=0; bool at_line_start=true;
     while (pos<n) {
         size_t start=pos; uint32_t cp=0;
         error->byte_offset=start; error->character=plan->characters+1;
@@ -116,7 +121,22 @@ bool text_plan(const char *text, size_t n, KeyboardLayout layout, TextPlan *plan
         CharacterKeys keys;
         if (!character_keys(cp,layout,&keys)) goto fail;
         for (unsigned j=0;j<keys.count;j++) plan->strokes[plan->count++]=keys.keys[j];
-        plan->characters++; if(cp=='\n') plan->lines++; if(cp=='\t') plan->tabs++;
+        plan->characters++;
+        if (cp=='\n') {
+            plan->lines++;
+            if (cancel_autoindent) {
+                /* Assumes literal space/tab copying and one character erased
+                   per Backspace. These internal key presses are not accepted
+                   as control characters in input files. */
+                Stroke bs={0,0x2a};
+                for (size_t i=0; i<line_indent_characters; i++) plan->strokes[plan->count++]=bs;
+            }
+            line_indent_characters=0; at_line_start=true;
+        } else {
+            if (at_line_start && (cp==' ' || cp=='\t')) line_indent_characters++;
+            else at_line_start=false;
+            if (cp=='\t') plan->tabs++;
+        }
     }
     return true;
 fail:

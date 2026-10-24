@@ -19,7 +19,7 @@ int main(int argc,char **argv) {
     const unsigned delays[]={0,2,10};
     for(int layout=0;layout<2;layout++) {
         TextPlan plan;TextError error;
-        assert(text_plan(data,(size_t)length,(KeyboardLayout)layout,&plan,&error));
+        assert(text_plan(data,(size_t)length,(KeyboardLayout)layout,false,&plan,&error));
         assert(plan.lines==breaks);
         for(unsigned speed=0;speed<3;speed++) {
             Typer t;typer_start(&t,plan.strokes,plan.count,delays[speed],0);t.enter_pause_ms=200;
