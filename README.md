@@ -1,10 +1,19 @@
-# Plume USB 0.1.6
+# Plume USB 0.1.7
 
 Nintendo Switch 1 homebrew that sends `Hello` or a text file as USB keyboard input.
 
-[Download v0.1.6](https://github.com/MichelSama/plume-usb/releases/tag/v0.1.6): use the `.nro` to update an existing installation, or the SD ZIP for a complete installation.
+[Download v0.1.7](https://github.com/MichelSama/plume-usb/releases/tag/v0.1.7): use the `.nro` to update an existing installation, or the SD ZIP for a complete installation.
 
 ![Text file preview](docs/preview.png)
+
+## Changes in 0.1.7
+
+- Auto-indent compensation: press L in the preview when the target editor automatically copies indentation after Enter. Off by default; the setting is saved.
+- Compensation handles leading spaces, tabs and mixtures of both. Backspace characters supplied in a text file remain unsupported and fail preflight, even when compensation is enabled.
+- Regression tests cover editor output, blank lines, dedents, mixed indentation, both layouts, control-character rejection and the 256 KiB file limit.
+- The corrected PR build was tested successfully on the user's consoles. See the compensation section below for editor assumptions.
+
+Thanks to [AsteroidPizza39](https://github.com/AsteroidPizza39) for the feature proposal and initial implementation in [PR #2](https://github.com/MichelSama/plume-usb/pull/2).
 
 ## Changes in 0.1.6
 
@@ -36,7 +45,7 @@ sdmc:/switch/plume-usb/plume-usb.nro
 5. Wait for `USB keyboard connected`, select `Send Hello`, then press A in the preview. Sending starts after three seconds. No Enter key is added.
 6. Check the target text. Press X to toggle Caps Lock if needed. Press - for USB diagnostics.
 
-The connected status requires USB configuration and the completed HID descriptor exchange. Successful USB reports do not prove that the target text field accepted the characters. Earlier builds have been used to type on a Switch 2; missing newlines were reported at 0, 2 and 10 ms. Version 0.1.6 has been compiled and tested locally; its new Enter timing still needs testing on the consoles.
+The connected status requires USB configuration and the completed HID descriptor exchange. Successful USB reports do not prove that the target text field accepted the characters. Earlier builds have been used to type on a Switch 2; missing newlines were reported at 0, 2 and 10 ms. The corrected build used for 0.1.7 received successful console test feedback. Compatibility with other target editors and maximum reliable speed still depend on the target.
 
 ## Text files and delays
 

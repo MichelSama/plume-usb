@@ -39,6 +39,6 @@ target=build/'plume-usb'
 run(gcc,f'-specs={kit.as_posix()}/libnx/switch.specs',
     '-march=armv8-a+crc+crypto','-mtune=cortex-a57','-mtp=soft','-fPIE',
     f'-Wl,-Map,{target.as_posix()}.map',*objects,f'-L{kit.as_posix()}/libnx/lib','-lnx','-lm','-o',str(target)+'.elf')
-run(tools/f'nacptool{exe}','--create','Plume USB','msama','0.1.6',str(target)+'.nacp')
+run(tools/f'nacptool{exe}','--create','Plume USB','msama','0.1.7',str(target)+'.nacp')
 run(tools/f'elf2nro{exe}',str(target)+'.elf',str(target)+'.nro',f'--nacp={target.as_posix()}.nacp',f'--icon={root.as_posix()}/assets/icon.jpg')
 print('Built:',str(target)+'.nro')

@@ -21,7 +21,7 @@ static void caps_chip(const View *v,int x,int y,int width) {
 void view_render(const View *v,uint32_t *pixels,int stride) {
     ui_begin(pixels,stride,v->dark); Palette p=ui_palette;
     ui_text(48,28,32,p.ink,"Plume USB",340);
-    ui_text(48,68,20,p.muted,"Version 0.1.6",470);
+    ui_text(48,68,20,p.muted,"Version 0.1.7",470);
     ui_roundrect(766,32,466,56,16,p.soft);
     ui_roundrect(786,53,12,12,6,v->usb_ready?p.positive:v->usb_initialized?p.accent:p.negative);
     ui_text(812,47,24,p.ink,v->usb_label,400);

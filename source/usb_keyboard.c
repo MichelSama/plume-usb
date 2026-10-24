@@ -64,7 +64,7 @@ Result keyboard_init(void) {
     log_milliseconds=log_origin=0; log_origin_set=false;
     status.protocol=1; status.state=UsbState_Detached;
     log_file=fopen("sdmc:/switch/plume-usb/usb.log","w");
-    keyboard_log("Plume USB 0.1.6 | HOS %u.%u.%u | applet=%d",
+    keyboard_log("Plume USB 0.1.7 | HOS %u.%u.%u | applet=%d",
         HOSVER_MAJOR(hosversionGet()),HOSVER_MINOR(hosversionGet()),HOSVER_MICRO(hosversionGet()),appletGetAppletType());
     Result rc=0;
     if (hosversionBefore(5,0,0)) return failed("Horizon OS 5.0.0 required",MAKERESULT(Module_Libnx,LibnxError_IncompatSysVer));
@@ -78,7 +78,7 @@ Result keyboard_init(void) {
     /* Experimental local identifier; not an impersonation of a Nintendo accessory. */
     struct usb_device_descriptor dev={
         .bLength=18,.bDescriptorType=USB_DT_DEVICE,.bcdUSB=0x0200,.bMaxPacketSize0=64,
-        .idVendor=0x1209,.idProduct=0x0001,.bcdDevice=0x0106,
+        .idVendor=0x1209,.idProduct=0x0001,.bcdDevice=0x0107,
         .iManufacturer=manufacturer,.iProduct=product,.iSerialNumber=serial,.bNumConfigurations=1
     };
     STEP("Full Speed descriptor",usbDsSetUsbDeviceDescriptor(UsbDeviceSpeed_Full,&dev));
