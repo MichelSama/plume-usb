@@ -37,7 +37,7 @@ static Screen previous_screen;
 static uint64_t now_ms(void) { return armTicksToNs(armGetSystemTick())/1000000; }
 static void save_settings(void) {
     FILE *file=fopen("sdmc:/switch/plume-usb/settings.txt","w");
-    if(file) { fprintf(file,"dark=%d\nlayout=%d\npace=%d\nenter_pause_ms=%d\n",view.dark,view.layout,view.pace,view.enter_pause_ms);fclose(file); }
+    if(file) { fprintf(file,"dark=%d\nlayout=%d\npace=%d\nenter_pause_ms=%d\ncancel_autoindent=%d\n",view.dark,view.layout,view.pace,view.enter_pause_ms,view.cancel_autoindent);fclose(file); }
 }
 static void load_settings(void) {
     FILE *file=fopen("sdmc:/switch/plume-usb/settings.txt","r");
@@ -48,6 +48,7 @@ static void load_settings(void) {
         if(sscanf(line,"layout=%d",&value)==1 && value>=0 && value<=1) view.layout=(KeyboardLayout)value;
         if(sscanf(line,"pace=%d",&value)==1 && value>=0 && value<PACE_COUNT) view.pace=value;
         if(sscanf(line,"enter_pause_ms=%d",&value)==1 && enter_pause_valid(value)) view.enter_pause_ms=value;
+        if(sscanf(line,"cancel_autoindent=%d",&value)==1) view.cancel_autoindent=value!=0;
     }
     fclose(file);
 }
@@ -100,7 +101,7 @@ static void browser_parent(void) {
 }
 static bool prepare_text(void) {
     text_plan_free(&plan);TextError error;
-    if(!text_plan(loaded_text,loaded_length,view.layout,&plan,&error)) {
+    if(!text_plan(loaded_text,loaded_length,view.layout,view.cancel_autoindent,&plan,&error)) {
         char msg[384];
         if(error.invalid_utf8) snprintf(msg,sizeof(msg),"Invalid UTF-8 at byte %zu. Save the file as UTF-8 and retry. Nothing was sent.",error.byte_offset+1);
         else if(error.character) snprintf(msg,sizeof(msg),"Unsupported character U+%04lX in %s at position %zu. Nothing was sent.",
@@ -201,8 +202,8 @@ static void begin_send(uint64_t now) {
     sender.enter_pause_ms=(unsigned)view.enter_pause_ms;
     view.total=plan.count;view.done=0;view.sending=false;view.seconds=3;
     appletSetMediaPlaybackState(true);
-    keyboard_log("SEND queued layout=%s chars=%zu strokes=%zu lines=%zu tabs=%zu pace=%d delay_ms=%u enter_pause_ms=%u",
-        view.layout==LAYOUT_FR?"FR":"US",plan.characters,plan.count,plan.lines,plan.tabs,view.pace,pace_delay(view.pace),sender.enter_pause_ms);
+    keyboard_log("SEND queued layout=%s chars=%zu strokes=%zu lines=%zu tabs=%zu pace=%d delay_ms=%u enter_pause_ms=%u autoindent=%d",
+        view.layout==LAYOUT_FR?"FR":"US",plan.characters,plan.count,plan.lines,plan.tabs,view.pace,pace_delay(view.pace),sender.enter_pause_ms,view.cancel_autoindent);
 }
 static void sending_tick(uint64_t now) {
     const KeyboardStatus *usb=keyboard_status();
@@ -277,6 +278,10 @@ static void perform(Action action,uint64_t now) {
         case ACTION_THEME: view.dark=!view.dark;save_settings();break;
         case ACTION_PACE: view.pace=pace_next(view.pace);save_settings();break;
         case ACTION_ENTER_PAUSE: view.enter_pause_ms=enter_pause_next(view.enter_pause_ms);save_settings();break;
+        case ACTION_AUTOINDENT:
+            view.cancel_autoindent=!view.cancel_autoindent;save_settings();
+            if(view.screen==SCREEN_CONFIRM) prepare_text();
+            break;
         case ACTION_CAPS_LOCK: begin_caps_toggle(now);break;
         case ACTION_LAYOUT:
             view.layout=view.layout==LAYOUT_FR?LAYOUT_US:LAYOUT_FR;save_settings();
@@ -336,6 +341,7 @@ int main(int argc,char **argv) {
             else if(view.screen==SCREEN_RESULT) action=ACTION_BACK;
             else if(view.screen!=SCREEN_TRANSFER) action=ACTION_SEND;
         } else if(down&HidNpadButton_R && view.screen==SCREEN_CONFIRM) action=ACTION_ENTER_PAUSE;
+        else if(down&HidNpadButton_L && view.screen==SCREEN_CONFIRM) action=ACTION_AUTOINDENT;
         else if(down&HidNpadButton_Minus && view.screen!=SCREEN_DIAGNOSTICS) action=ACTION_DIAGNOSTICS;
         else if(down&HidNpadButton_X && view.screen!=SCREEN_DIAGNOSTICS) action=ACTION_CAPS_LOCK;
         else if(down&HidNpadButton_Y && view.screen!=SCREEN_DIAGNOSTICS) action=ACTION_LAYOUT;
